@@ -1,9 +1,7 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
+import equipments from "@/routes/equipments";
 
-const app = new Hono()
+const app = new Hono();
+app.route("/", equipments); //登録機器の全件取得
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
-
-export default app
+export default app;
