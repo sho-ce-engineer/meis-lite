@@ -38,4 +38,11 @@ app.post("/equipments", async (c) => {
 	}
 });
 
+//登録機器の1件削除
+app.delete("/equipments/:id", async (c) => {
+	const uniqueId = Number(c.req.param("id"));
+	await db.delete(equipmentLedger).where(eq(equipmentLedger.id, uniqueId));
+	return c.body(null, 204);
+});
+
 export default app;
