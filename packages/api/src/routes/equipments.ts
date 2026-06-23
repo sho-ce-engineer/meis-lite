@@ -1,7 +1,7 @@
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "@/db";
 import { equipmentLedger } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { createEquipmentSchema } from "@/schemas/equipments";
 
 const app = new Hono();
@@ -43,6 +43,36 @@ app.delete("/equipments/:id", async (c) => {
 	const uniqueId = Number(c.req.param("id"));
 	await db.delete(equipmentLedger).where(eq(equipmentLedger.id, uniqueId));
 	return c.body(null, 204);
+});
+
+//機器の登録内容の編集
+app.patch("/equipments/:id", async (c) => {
+	const uniqueId = Number(c.req.param("id"));
+	const body = await c.req.json();
+	const patchEquipmentSchema = createEquipmentSchema.partial();
+	const parceResult = patchEquipmentSchema.safeParse(body);
+
+	if (!parceResult.success) {
+		console.error(`${parceResult.error}`);
+		return c.text("[PATCH /equipments/id]Bad Request", 400);
+	}
+
+	try {
+		const result = await db
+			.update(equipmentLedger)
+			.set(parceResult.data)
+			.where(eq(equipmentLedger.id, uniqueId))
+			.returning();
+
+		if (result.length === 0) {
+			console.error("[PATCH /equipments/id]Not Found ID");
+			return c.text("[PATCH /equipments/id]Not Found", 404);
+		}
+		return c.json(result);
+	} catch (error) {
+		console.error("[PATCH /equipments/id]Internal Server Error", error);
+		return c.text("[PATCH /equipments/id]Internal Server Error", 500);
+	}
 });
 
 export default app;
