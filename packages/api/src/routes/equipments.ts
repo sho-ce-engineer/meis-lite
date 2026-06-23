@@ -46,15 +46,21 @@ app.get("/equipments/:id", async (c) => {
 app.post("/equipments", async (c) => {
 	const body = await c.req.json();
 	const parceResult = createEquipmentSchema.safeParse(body);
+
 	if (!parceResult.success) {
 		console.error(`${parceResult.error}`);
 		return c.text("[POST /equipments]Bad Request", 400);
-	} else {
+	}
+
+	try {
 		const result = await db
 			.insert(equipmentLedger)
 			.values(parceResult.data)
 			.returning();
-		return c.json(result);
+		return c.json(result, 201);
+	} catch (error) {
+		console.error("[POST /equipments]Internal Server Error", error);
+		return c.text("[POST /equipments]Internal Server Error", 500);
 	}
 });
 
