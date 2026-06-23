@@ -8,8 +8,13 @@ const app = new Hono();
 
 //登録機器の全件取得
 app.get("/equipments", async (c) => {
-	const Items = await db.select().from(equipmentLedger);
-	return c.json(Items);
+	try {
+		const Items = await db.select().from(equipmentLedger);
+		return c.json(Items);
+	} catch (error) {
+		console.error("[GET /equipments]Internal Server Error", error);
+		return c.text("[GET /equipments]Internal Server Error", 500);
+	}
 });
 
 //登録機器の1件取得
