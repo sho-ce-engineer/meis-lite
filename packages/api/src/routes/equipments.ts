@@ -67,8 +67,25 @@ app.post("/equipments", async (c) => {
 //登録機器の1件削除
 app.delete("/equipments/:id", async (c) => {
 	const uniqueId = Number(c.req.param("id"));
-	await db.delete(equipmentLedger).where(eq(equipmentLedger.id, uniqueId));
-	return c.body(null, 204);
+	if (!uniqueId) {
+		console.error("[DELETE /equipments/id]Bad Request");
+		return c.text("[DELETE /equipments/id]Bad Request", 400);
+	}
+	try {
+		const result = await db
+			.delete(equipmentLedger)
+			.where(eq(equipmentLedger.id, uniqueId))
+			.returning();
+
+		if (result.length === 0) {
+			return c.text("[DELETE /equipments/id]Not Found", 404);
+		}
+
+		return c.body(null, 204);
+	} catch (error) {
+		console.error("[DELETE /equipments/id]Internal Server Error", error);
+		return c.text("[DELETE /equipments/id]Internal Server Error", 500);
+	}
 });
 
 //機器の登録内容の編集
