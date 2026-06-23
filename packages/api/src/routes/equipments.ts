@@ -91,6 +91,11 @@ app.delete("/equipments/:id", async (c) => {
 //機器の登録内容の編集
 app.patch("/equipments/:id", async (c) => {
 	const uniqueId = Number(c.req.param("id"));
+	if (!uniqueId) {
+		console.error("[PATCH /equipments/id]Bad Request");
+		return c.text("[PATCH /equipments/id]Bad Request", 400);
+	}
+
 	const body = await c.req.json();
 	const patchEquipmentSchema = createEquipmentSchema.partial();
 	const parceResult = patchEquipmentSchema.safeParse(body);
