@@ -15,11 +15,26 @@ app.get("/equipments", async (c) => {
 //登録機器の1件取得
 app.get("/equipments/:id", async (c) => {
 	const uniqueId = Number(c.req.param("id"));
-	const targetItem = await db
-		.select()
-		.from(equipmentLedger)
-		.where(eq(equipmentLedger.id, uniqueId));
-	return c.json(targetItem);
+
+	if (!uniqueId) {
+		console.error("[GET /equipments/id]Bad Request");
+		return c.text("[GET /equipments/id]Bad Request", 400);
+	}
+
+	try {
+		const targetItem = await db
+			.select()
+			.from(equipmentLedger)
+			.where(eq(equipmentLedger.id, uniqueId));
+		if (targetItem.length === 0) {
+			console.error("[GET /equipments/id]Not Found ID");
+			return c.text("[GET /equipments/id]Not Found", 404);
+		}
+		return c.json(targetItem);
+	} catch (error) {
+		console.error("[GET /equipments/id]Internal Server Error", error);
+		return c.text("[GET /equipments/id]Internal Server Error", 500);
+	}
 });
 
 //機器の登録
