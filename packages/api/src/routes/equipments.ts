@@ -3,13 +3,14 @@ import { Hono } from "hono";
 import { db } from "@/db";
 import { equipmentLedger } from "@/db/schema";
 import { createEquipmentSchema } from "@/schemas/equipments";
+import { getAllEquipments } from "@/services/equipments";
 
 const app = new Hono();
 
 //登録機器の全件取得
 app.get("/equipments", async (c) => {
 	try {
-		const Items = await db.select().from(equipmentLedger);
+		const Items = await getAllEquipments();
 		return c.json(Items);
 	} catch (error) {
 		console.error("[GET /equipments]Internal Server Error", error);
